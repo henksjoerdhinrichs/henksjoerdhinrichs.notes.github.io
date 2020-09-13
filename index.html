@@ -1,8 +1,201 @@
 <!DOCTYPE html>
 <html>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
-<p>Laatste aanpassing..</p>
+<h1>Nmap Scan Types</h1>
+
+
+<h2>TCP Connect</h2>
+
+<p>TCP Connect scan completes the 3-way handshake.</p>
+
+<p>If a port is open, the operating system completed the TCP three-way handshake and the port scanner immediately closes
+    the connection to avoid DOS. This is “noisy” because the services can log the sender IP address and might trigger Intrusion Detection Systems.</p>
+
+<h2>UDP Scan</h2>
+
+<p>This scan checks to see if there are any UDP ports listening.</p>
+
+<p>Since UDP does not respond with a positive acknowledgment like TCP and only responds to an incoming UDP packet when the port is closed,
+    this type of scan can sometimes show false positives. However, it can also reveal Trojan horses running on high UDP ports and hidden RPC services.
+    It may be quite slow since some machines intentionally slow down responses to this kind of traffic to avoid being overwhelmed.
+    Machines running Windows OS, however, do not implement this slowdown feature, so you should be able to use UDP to scan Windows hosts normally.</p>
+
+<h2>SYN Scan</h2>
+
+<p>SYN scan is another form of TCP scanning.</p>
+
+<p>Rather than using the operating system’s network functions, the port scanner generates raw IP packets itself, and monitors for responses.
+    This scan type is also known as “half-open scanning” because it never actually opens a full TCP connection.
+    The port scanner generates an SYN packet. If the target port is open, it will respond with an SYN-ACK packet.
+    The scanner host responds with an RST packet, closing the connection before the handshake is completed.
+    If the port is closed but unfiltered, the target will instantly respond with an RST packet.
+    There is debate over which scan is less intrusive on the target host. SYN scan has the advantage that the individual services never actually receive a connection.</p>
+
+<h2>FIN Scan</h2>
+
+<p>This is a stealthy scan, like the SYN scan, but sends a TCP FIN packet instead.</p>
+
+<p>Most but not all computers will send an RST packet back if they get this input, so the FIN scan can show false positives and negatives, but it may get under the radar of some
+    IDS programs and other countermeasures.</p>
+
+<h2>ACK Scan</h2>
+
+<p>Ack scanning determines whether the port is filtered or not.</p>
+
+<p>This is especially good when attempting to probe for the existence of a firewall and its rulesets.
+    Simple packet filtering will allow established connections (packets with the ACK bit set), whereas a more sophisticated stateful firewall might not.</p>
+
+<h2>NULL Scan</h2>
+
+<p>Another very stealthy scan that sets all the TCP header flags to off or null.</p>
+
+<p>This is not normally a valid packet and some hosts will not know what to do with this.
+    Windows operating systems are in this group, and scanning them with NULL scans will produce unreliable results.
+    However, for non-Windows servers protected by a firewall, this can be a way to get through.</p>
+
+<h2>XMAS Scan</h2>
+
+<p>Similar to the NULL scan except for all the flags in the TCP header is set to on.</p>
+
+<p>Windows machines won’t respond to this due to the way their TCP stack is implemented.
+    Xmas scans derive their name from the set of flags that are turned on within a packet.
+    These scans are designed to manipulate the PSH, URG and FIN flags of the TCP header.</p>
+
+<h2>RPC Scan</h2>
+
+<p>This special type of scan looks for machines answering to RPC (Remote Procedure Call) services.</p>
+
+<p>RPC, which allows remote commands to be run on the machine under certain conditions, can be a dangerous service.
+    Since RPC services can run on many different ports, it is hard to tell from a normal scan which ones might be running RPC.
+    This scan will probe the ports found open on a machine with commands to show the program name and version if RPC is running.
+    It’s not a bad idea to run one of these scans every so often just to find out if and where you have these services running.</p>
+
+<h2>IDLE Scan</h2>
+
+<p>It is a super stealthy method whereby the scan packets are
+    bounced off an external host.</p>
+
+<p>You don’t need to have control over the other host but it does have to set up and meet certain requirements.
+    You must input the IP address of our “zombie” host and what port number to use.
+    It is one of the more controversial options in Nmap since it really only has a use for malicious attacks.</p>
+
+<h2>Scan Techniques</h2>
+<p>
++--------+------------------------+----------------------+
+| Switch |       Description      |        Example       |
++--------+------------------------+----------------------+
+|   -sS  |   TCP SYN port scan.   | nmap -sS 192.168.1.1 |
++--------+------------------------+----------------------+
+|   -sT  | TCP Connect port scan. | nmap -sT 192.168.1.1 |
++--------+------------------------+----------------------+
+|   -sU  |     UDP port scan.     | nmap -sU 192.168.1.1 |
++--------+------------------------+----------------------+
+|   -sA  |   TCP ACK port scan.   | nmap -sA 192.168.1.1 |
++--------+------------------------+----------------------+
+</p>
+
+<h2>Host Discovery</h2>
+
+<p>
++--------+---------------------------------+----------------------+
+| Switch |           Description           |        Example       |
++--------+---------------------------------+----------------------+
+|   -Pn  |         Only port scan.         | nmap -Pn 192.168.1.1 |
++--------+---------------------------------+----------------------+
+|   -sn  |       Only host discovery.      | nmap -sn 192.168.1.1 |
++--------+---------------------------------+----------------------+
+|   -PR  | ARP discovery on local network. | nmap -PR 192.168.1.1 |
++--------+---------------------------------+----------------------+
+|   -n   |     Disable DNS resolution.     |  nmap -n 192.168.1.1 |
++--------+---------------------------------+----------------------+
+</p>
+
+<h2>Port Specification</h2>
+
+<p>
++--------+---------------------------+---------------------------+
+| Switch |        Description        |          Example          |
++--------+---------------------------+---------------------------+
+|   -p   |    Port or port range.    | nmap -p 22-80 192.168.1.1 |
++--------+---------------------------+---------------------------+
+|   -p-  |      Scan all ports.      |    nmap -p- 192.168.1.1   |
++--------+---------------------------+---------------------------+
+|   -F   | Fast port scan. (top 100) |    nmap -F 192.168.1.1    |
++--------+---------------------------+---------------------------+
+</p>
+
+<h2>Service and Version Detection</h2>
+
+<p>
++--------+---------------------------------+----------------------+
+| Switch |           Description           |        Example       |
++--------+---------------------------------+----------------------+
+|   -sV  | Detect the version of services. | nmap -sV 192.168.1.1 |
++--------+---------------------------------+----------------------+
+|   -A   |      Enable OS detection,       |  nmap -A 192.168.1.1 |
+|        |       version detection,        |                      |
+|        | script scanning and traceroute. |                      |
++--------+---------------------------------+----------------------+
+</p>
+
+<h2>OS Detection</h2>
+
+<p>
++--------+-------------------------------+---------------------+
+| Switch |          Description          |       Example       |
++--------+-------------------------------+---------------------+
+|   -O   |       Identify OS using       | nmap -O 192.168.1.1 |
+|        | TCP/IP strack fingerprinting. |                     |
++--------+-------------------------------+---------------------+
+</p>
+
+<h2>Timing and Performance</h2>
+
+<p>
++--------+----------------------------------+----------------------+
+| Switch |            Description           |        Example       |
++--------+----------------------------------+----------------------+
+|   -T0  |       Paranoid IDS evasion.      | nmap -T0 192.168.1.1 |
++--------+----------------------------------+----------------------+
+|   -T1  |        Sneaky IDS evasion.       | nmap -T1 192.168.1.1 |
++--------+----------------------------------+----------------------+
+|   -T2  |        Polite IDS evasion.       | nmap -T2 192.168.1.1 |
+|        |     (requires less bandwidth)    |                      |
++--------+----------------------------------+----------------------+
+|   -T3  |   Normal IDS evasion. (default)  | nmap -T3 192.168.1.1 |
++--------+----------------------------------+----------------------+
+|   -T4  |      Aggressive speed scan.      | nmap -T4 192.168.1.1 |
+|        |      (requires fast network)     |                      |
++--------+----------------------------------+----------------------+
+|   -T5  |        Insane speed scan.        | nmap -T5 192.168.1.1 |
+|        | (requires massive network speed) |                      |
++--------+----------------------------------+----------------------+
+</p>
+
+<h2>NSE Scripts</h2>
+
+<p>+-----------------+------------------------+----------------------+
+|      Switch     |       Description      |        Example       |
++-----------------+------------------------+----------------------+
+|       -sC       |  Default script scan.  | nmap -sC 192.168.1.1 |
++-----------------+------------------------+----------------------+
+| --script banner | Specify single script. | nmap --script banner |
+|                 |    (banner grabbing)   |      192.168.1.1     |
+    +-----------------+------------------------+----------------------+</p>
+
+<h2>Firewall / IDS Evasion</h2>
+
+<p>+--------+-------------------------------+------------------------+
+| Switch |          Description          |         Example        |
++--------+-------------------------------+------------------------+
+|   -f   |   Use fragmented IP packets.  |   nmap -f 192.168.1.1  |
+|        |    (packet filter evasion)    |                        |
++--------+-------------------------------+------------------------+
+|   -D   |          Decoy scan.          |   nmap -D 192.168.1.1  |
+|        |      (spoofed source IPs)     |                        |
++--------+-------------------------------+------------------------+
+|   -g   | Use given source port number. | nmap -g 22 192.168.1.1 |
+    +--------+-------------------------------+------------------------+</p>
+
 </body>
 </html>
